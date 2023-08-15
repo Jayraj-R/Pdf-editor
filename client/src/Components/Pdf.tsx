@@ -11,7 +11,6 @@ type PdfOption = {
 const Pdf = () => {
 	const [currentPdf, setCurrentPdf] = useState<PdfOption | null>(null);
 	const [pdfData, setPdfData] = useState<Blob | null>(null);
-	const [pdfUrl, setPdfUrl] = useState<String | null>(null);
 
 	useEffect(() => {
 		currentPdf
@@ -33,9 +32,9 @@ const Pdf = () => {
 
 	console.log(currentPdf);
 	return (
-		<div>
+		<div className='flex justify-center items-center w-screen h-screen bg-blue-200 gap-5 p-10'>
 			<PdfSelector currentPdf={currentPdf} setCurrentPdf={setCurrentPdf} />
-			<PdfViewer pdfData={pdfData} setPdfData={setPdfData} pdfUrl={pdfUrl} />
+			{pdfData && <PdfViewer pdfData={pdfData} setPdfData={setPdfData} />}
 		</div>
 	);
 };

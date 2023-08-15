@@ -3,7 +3,7 @@ import Pdf from './Components/Pdf';
 
 function App() {
 	return (
-		<div className='App'>
+		<div>
 			<Pdf />
 		</div>
 	);

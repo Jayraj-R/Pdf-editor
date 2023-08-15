@@ -31,7 +31,12 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 	};
 
 	return (
-		<div>
+		<div className='flex flex-col w-1/3 gap-4'>
+			{!currentPdf && (
+				<span className='text-center text-2xl'>
+					Select the pdf that you would like to load...
+				</span>
+			)}
 			<AsyncSelect
 				cacheOptions
 				defaultOptions
@@ -41,6 +46,13 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 				isClearable={true}
 				isSearchable={true}
 			/>
+			{currentPdf && (
+				<div className='flex justify-center'>
+					<button className='bg-blue-500 text-white cursor-pointer px-10 py-2 rounded-lg'>
+						Save
+					</button>
+				</div>
+			)}
 		</div>
 	);
 };
