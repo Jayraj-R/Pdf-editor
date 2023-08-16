@@ -2,6 +2,8 @@
 
 PDF Editor is a web application that empowers users to seamlessly edit interactive fillable PDF files directly within their browser. This project constitutes a full-stack application currently tailored for local development, with plans for a deployable version in the near future.
 
+**Note**: The actual act of saving the updated PDF file after making changes is not implemented in this version. Interactive editing functionality requires [Pdf.js Express](https://pdfjs.express/pricing), which unfortunately demands a paid version. As a workaround for simulation purposes, the "Save" button will alter the file's name to a hardcoded phrase, serving demonstration objectives.
+
 ## Technologies Utilized
 
 1. **Frontend**: ReactJS, TypeScript, Tailwind CSS
