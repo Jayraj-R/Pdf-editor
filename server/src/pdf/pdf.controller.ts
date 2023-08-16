@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   Post,
   Res,
@@ -10,9 +11,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
 import { PdfService } from './pdf.service';
+
 @Controller('pdf')
 export class PdfController {
   constructor(private readonly pdfService: PdfService) {}
@@ -23,10 +23,7 @@ export class PdfController {
       const pdfNames = await this.pdfService.getAllPdfNames();
       res.send(pdfNames);
     } catch (error) {
-      res.status(500).send({
-        error: 'Something went wrong while getting PDF names',
-        message: error.message,
-      });
+      this.handleError(res, error);
     }
   }
 
@@ -37,27 +34,17 @@ export class PdfController {
       res.setHeader('Content-Type', 'application/pdf');
       res.send(pdfContent);
     } catch (error) {
-      res.status(500).send({
-        error: 'Something went wrong while updating the PDF',
-        message: error.message,
-      });
+      this.handleError(res, error);
     }
   }
 
   @Post('upload')
   async uploadPdf(@Res() res: Response): Promise<any> {
-    const uploadsFolderPath = './uploads';
-    const pdfFilePath = path.join(uploadsFolderPath, 'example.pdf');
-
     try {
-      const pdfContent = await fs.promises.readFile(pdfFilePath);
-      this.pdfService.uploadPdf(pdfContent);
-      res.status(200).send('PDF successfully uploaded!');
+      await this.pdfService.uploadPdf();
+      res.status(HttpStatus.OK).send('PDF successfully uploaded!');
     } catch (error) {
-      res.status(500).send({
-        error: 'Something went wrong while uploading the PDF',
-        message: error.message,
-      });
+      this.handleError(res, error);
     }
   }
 
@@ -70,12 +57,16 @@ export class PdfController {
   ) {
     try {
       await this.pdfService.updatePdf(name, file.buffer);
-      res.status(200).send('PDF successfully updated!');
+      res.status(HttpStatus.OK).send('PDF successfully updated!');
     } catch (error) {
-      res.status(500).send({
-        error: 'Something went wrong while updating the PDF',
-        message: error.message,
-      });
+      this.handleError(res, error);
     }
+  }
+
+  private handleError(res: Response, error: Error) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+      error: 'Something went wrong!',
+      message: error.message,
+    });
   }
 }

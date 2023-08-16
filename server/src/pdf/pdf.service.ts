@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Repository } from 'typeorm';
 import { Pdf } from '../entities/pdf.entity';
 
@@ -28,7 +30,11 @@ export class PdfService {
     return existingPdf.fileData;
   }
 
-  async uploadPdf(pdfContent: Buffer): Promise<any> {
+  async uploadPdf(): Promise<any> {
+    const uploadsFolderPath = './uploads';
+    const pdfFilePath = path.join(uploadsFolderPath, 'example.pdf');
+    const pdfContent = await fs.promises.readFile(pdfFilePath);
+
     const pdf = new Pdf();
     pdf.name = `example${Math.floor(Math.random() * 100)}.pdf`;
     pdf.fileData = pdfContent;
