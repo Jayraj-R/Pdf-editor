@@ -5,8 +5,7 @@ PDF Editor is a web application that empowers users to seamlessly edit interacti
 **Note**: The actual act of saving the updated PDF file after making changes is not implemented in this version. Interactive editing functionality requires [Pdf.js Express](https://pdfjs.express/pricing), which unfortunately demands a paid version. As a workaround for simulation purposes, the "Save" button will alter the file's name to a hardcoded phrase, serving demonstration objectives.
 
 ## Screenshots
-[![pdf1.png](https://i.postimg.cc/rFvTYT2c/pdf1.png)](https://postimg.cc/TpqBpZPH)
-[![pdf2.png](https://i.postimg.cc/dQgQgrGz/pdf2.png)](https://postimg.cc/s19RhB6c)
+[![pdf1.png](https://i.postimg.cc/rFvTYT2c/pdf1.png)](https://postimg.cc/TpqBpZPH)[![pdf3.png](https://i.postimg.cc/xCy7gryf/pdf3.png)](https://postimg.cc/9R0JFnnK)
 
 ## Technologies Utilized
 
