@@ -27,10 +27,10 @@ export class PdfController {
     }
   }
 
-  @Get(':name')
-  async getPdfByName(@Param('name') name: string, @Res() res: Response) {
+  @Get(':id')
+  async getPdfByName(@Param('id') id: number, @Res() res: Response) {
     try {
-      const pdfContent = await this.pdfService.getPdfByName(name);
+      const pdfContent = await this.pdfService.getPdfByName(id);
       res.setHeader('Content-Type', 'application/pdf');
       res.send(pdfContent);
     } catch (error) {
@@ -52,11 +52,11 @@ export class PdfController {
   @UseInterceptors(FileInterceptor('fileData'))
   async uploadData(
     @UploadedFile() file: Express.Multer.File,
-    @Body('name') name: string,
+    @Body('id') id: number,
     @Res() res: Response,
   ) {
     try {
-      await this.pdfService.updatePdf(name, file.buffer);
+      await this.pdfService.updatePdf(id, file.buffer);
       res.status(HttpStatus.OK).send('PDF successfully updated!');
     } catch (error) {
       this.handleError(res, error);

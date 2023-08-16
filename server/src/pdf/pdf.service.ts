@@ -12,19 +12,20 @@ export class PdfService {
     private pdfRepository: Repository<Pdf>,
   ) {}
 
-  async getAllPdfNames(): Promise<string[]> {
+  async getAllPdfNames(): Promise<{ id: number; name: string }[]> {
     const pdfs = await this.pdfRepository
       .createQueryBuilder('pdf')
-      .select('pdf.name')
-      .getMany();
+      .select('pdf.id', 'id')
+      .addSelect('pdf.name', 'name')
+      .getRawMany();
 
-    return pdfs.map((pdf) => pdf.name);
+    return pdfs;
   }
 
-  async getPdfByName(name: string): Promise<any> {
-    const existingPdf = await this.pdfRepository.findOne({ where: { name } });
+  async getPdfByName(id: number): Promise<any> {
+    const existingPdf = await this.pdfRepository.findOne({ where: { id } });
     if (!existingPdf) {
-      throw Error(`No existing pdf found with name ${name}`);
+      throw Error(`No existing pdf found for the given request`);
     }
 
     return existingPdf.fileData;
@@ -42,8 +43,8 @@ export class PdfService {
     await this.pdfRepository.save(pdf);
   }
 
-  async updatePdf(name: string, fileData: Buffer): Promise<any> {
-    const existingPdf = await this.pdfRepository.findOne({ where: { name } });
+  async updatePdf(id: number, fileData: Buffer): Promise<any> {
+    const existingPdf = await this.pdfRepository.findOne({ where: { id } });
 
     if (!existingPdf) {
       throw Error('PDF not found!');

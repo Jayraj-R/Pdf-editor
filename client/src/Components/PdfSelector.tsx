@@ -5,15 +5,15 @@ import { PdfSelectorProps } from '../utils/Types';
 import { constants } from '../utils/constants';
 
 const PdfSelector: React.FC<PdfSelectorProps> = ({
-	currentPdfName,
-	setCurrentPdfName,
+	currentPdf,
+	setCurrentPdf,
 }) => {
 	const loadOptions = async () => {
 		try {
 			const response = await axios.get(`${constants.BACKEND_URI_LOCAL}/list`);
-			return response.data.map((pdfName: string) => ({
-				value: pdfName,
-				label: pdfName.split('.')[0],
+			return response.data.map((pdf: any) => ({
+				value: pdf.id,
+				label: pdf.name.split('.')[0],
 			}));
 		} catch (error) {
 			console.error(error);
@@ -22,9 +22,7 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 	};
 
 	const handleChange = async (selectedOption: any) => {
-		selectedOption
-			? setCurrentPdfName(selectedOption)
-			: setCurrentPdfName(null);
+		selectedOption ? setCurrentPdf(selectedOption) : setCurrentPdf(null);
 	};
 
 	// const uploadSampleViaBackend = async () => {
@@ -45,7 +43,7 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 
 	return (
 		<div className='flex flex-col w-1/3 gap-4'>
-			{!currentPdfName && (
+			{!currentPdf && (
 				<span className='text-center text-2xl'>
 					Select the pdf that you would like to load...
 				</span>
@@ -53,7 +51,7 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 			<AsyncSelect
 				cacheOptions
 				defaultOptions
-				value={currentPdfName}
+				value={currentPdf}
 				loadOptions={loadOptions}
 				onChange={handleChange}
 				isClearable={true}

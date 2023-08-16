@@ -4,8 +4,8 @@ export type SelectOptions = {
 };
 
 export interface PdfSelectorProps {
-	currentPdfName: SelectOptions | null;
-	setCurrentPdfName: React.Dispatch<React.SetStateAction<SelectOptions | null>>;
+	currentPdf: SelectOptions | null;
+	setCurrentPdf: React.Dispatch<React.SetStateAction<SelectOptions | null>>;
 }
 export interface PdfViewerProps {
 	fileData: Blob | null;

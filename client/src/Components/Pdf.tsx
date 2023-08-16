@@ -6,15 +6,13 @@ import PdfSelector from './PdfSelector';
 import PdfViewer from './PdfViewer';
 
 const Pdf = () => {
-	const [currentPdfName, setCurrentPdfName] = useState<SelectOptions | null>(
-		null
-	);
+	const [currentPdf, setCurrentPdf] = useState<SelectOptions | null>(null);
 	const [fileData, setFileData] = useState<Blob | null>(null);
 
 	useEffect(() => {
-		currentPdfName
+		currentPdf
 			? axios
-					.get(`${constants.BACKEND_URI_LOCAL}/${currentPdfName.value}`, {
+					.get(`${constants.BACKEND_URI_LOCAL}/${currentPdf.value}`, {
 						responseType: 'arraybuffer',
 					})
 					.then((response) => {
@@ -24,45 +22,36 @@ const Pdf = () => {
 						setFileData(fileData);
 					})
 					.catch((error) => {
-						console.error(`Error fetching PDF ${currentPdfName}:`, error);
+						console.error(`Error fetching PDF ${currentPdf?.label}:`, error);
 					})
 			: setFileData(null);
-	}, [currentPdfName]);
+	}, [currentPdf]);
 
 	const updatePdf = async () => {
-		if (!currentPdfName || !fileData) return;
+		if (!currentPdf || !fileData) return;
 
 		const formData = new FormData();
-		formData.append('name', currentPdfName.value);
+		formData.append('name', currentPdf.value);
 		formData.append('fileData', fileData);
 
 		try {
 			const response = await axios.post(
 				`${constants.BACKEND_URI_LOCAL}/update`,
 				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
-				}
+				{ headers: { 'Content-Type': 'multipart/form-data' } }
 			);
 
-			console.log(
-				`Response from updating the ${currentPdfName.value}:`,
-				response
-			);
+			alert('Updated PDF successfully.');
+			console.log(`Response from updating the ${currentPdf.value}:`, response);
 		} catch (error) {
-			console.error(`Error updating the PDF ${currentPdfName.value}:`, error);
+			console.error(`Error updating the PDF ${currentPdf.value}:`, error);
 		}
 	};
 
 	return (
 		<div className='flex justify-center items-center w-screen h-screen bg-blue-200 gap-5 p-10'>
-			<PdfSelector
-				currentPdfName={currentPdfName}
-				setCurrentPdfName={setCurrentPdfName}
-			/>
-			{currentPdfName && (
+			<PdfSelector currentPdf={currentPdf} setCurrentPdf={setCurrentPdf} />
+			{currentPdf && (
 				<div className='flex justify-center'>
 					<button
 						onClick={updatePdf}
