@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React from 'react';
+import React, { useState } from 'react';
 import AsyncSelect from 'react-select/async';
 
 interface PdfSelectorProps {
@@ -11,7 +11,9 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 	currentPdf,
 	setCurrentPdf,
 }) => {
-	const loadOptions = async (inputValue: string) => {
+	const [refreshOptions, setRefreshOptions] = useState<boolean>(true);
+
+	const loadOptions = async () => {
 		try {
 			const response = await axios.get(`http://localhost:8000/pdf/list`);
 			const pdfNames = response.data;
@@ -30,6 +32,21 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 		selectedOption ? setCurrentPdf(selectedOption) : setCurrentPdf(null);
 	};
 
+	const uploadSampleViaBackend = async () => {
+		try {
+			const response = await axios.post('http://localhost:8000/pdf/upload');
+
+			if (response.status === 200) {
+				console.log(response.data.message);
+				setRefreshOptions(!refreshOptions);
+			} else {
+				console.error('Upload failed');
+			}
+		} catch (error) {
+			console.error('Error uploading PDF:', error);
+		}
+	};
+
 	return (
 		<div className='flex flex-col w-1/3 gap-4'>
 			{!currentPdf && (
@@ -38,6 +55,7 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 				</span>
 			)}
 			<AsyncSelect
+				key={`${refreshOptions}`}
 				cacheOptions
 				defaultOptions
 				value={currentPdf}
@@ -46,13 +64,14 @@ const PdfSelector: React.FC<PdfSelectorProps> = ({
 				isClearable={true}
 				isSearchable={true}
 			/>
-			{currentPdf && (
-				<div className='flex justify-center'>
-					<button className='bg-blue-500 text-white cursor-pointer px-10 py-2 rounded-lg'>
-						Save
-					</button>
-				</div>
-			)}
+
+			{/* Adding demo pdf to the database using nestjs server */}
+			<button
+				className='bg-blue-500 px-4 py-2 text-white'
+				onClick={uploadSampleViaBackend}
+			>
+				Upload samples
+			</button>
 		</div>
 	);
 };

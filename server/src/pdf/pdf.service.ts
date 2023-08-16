@@ -1,34 +1,58 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Pdf } from '../entities/pdf.entity';
 
 @Injectable()
 export class PdfService {
-  private pdfs: any[] = [];
+  constructor(
+    @InjectRepository(Pdf)
+    private pdfRepository: Repository<Pdf>,
+  ) {}
 
-  getAllPdfs() {
-    return this.pdfs;
+  async getAllPdfNames(): Promise<string[]> {
+    const pdfs = await this.pdfRepository
+      .createQueryBuilder('pdf')
+      .select('pdf.name')
+      .getMany();
+
+    return pdfs.map((pdf) => pdf.name);
   }
 
-  uploadPdf(pdfFile: Express.Multer.File) {
-    // Do something with the uploaded PDF file
-    const filePath = `./uploads/${pdfFile.originalname}`;
-    fs.writeFileSync(filePath, pdfFile.buffer);
-
-    return { message: 'PDF uploaded successfully' };
-  }
-
-  updatePdf(id: string, pdfFile: Express.Multer.File) {
-    const existingPdf = this.pdfs.find((pdf) => pdf.id === id);
+  async getPdfByName(name: string): Promise<any> {
+    const existingPdf = await this.pdfRepository.findOne({ where: { name } });
     if (!existingPdf) {
-      return { message: 'PDF not found!' };
+      throw Error(`No existing pdf found with name ${name}`);
     }
 
-    // Do something with the uploaded PDF file
-    const filePath = `./uploads/${pdfFile.originalname}`;
-    fs.writeFileSync(filePath, pdfFile.buffer);
+    return existingPdf.fileData;
+  }
 
-    existingPdf.path = filePath; // Update the PDF path or any other properties
+  async uploadPdf(pdfContent: Buffer): Promise<any> {
+    const pdf = new Pdf();
+    pdf.name = `example${Math.floor(Math.random() * 100)}.pdf`;
+    pdf.fileData = pdfContent;
 
-    return { message: `PDF with ID ${id} updated` };
+    await this.pdfRepository.save(pdf);
+  }
+
+  async updatePdf(name: string, fileData: Buffer): Promise<any> {
+    const existingPdf = await this.pdfRepository.findOne({ where: { name } });
+
+    if (!existingPdf) {
+      throw Error('PDF not found!');
+    }
+
+    existingPdf.name = 'jayraj'; // Adding this line just for demo
+    existingPdf.fileData = fileData;
+    await this.pdfRepository.save(existingPdf);
+  }
+
+  async saveFile(name: string, fileData: Buffer) {
+    const data = new Pdf();
+    data.name = name;
+    data.fileData = fileData;
+
+    await this.pdfRepository.save(data);
   }
 }

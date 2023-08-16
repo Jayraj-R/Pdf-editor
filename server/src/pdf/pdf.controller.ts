@@ -1,9 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   Post,
-  Put,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -13,50 +13,69 @@ import { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PdfService } from './pdf.service';
-
 @Controller('pdf')
 export class PdfController {
   constructor(private readonly pdfService: PdfService) {}
 
   @Get('list')
-  async listPdfNames() {
-    const uploadsFolderPath = './uploads'; // Replace with the actual path to the uploads folder
-
+  async listPdfNames(@Res() res: Response) {
     try {
-      const files = await fs.promises.readdir(uploadsFolderPath);
-      const pdfFiles = files.filter((file) => path.extname(file) === '.pdf');
-      return pdfFiles;
+      const pdfNames = await this.pdfService.getAllPdfNames();
+      res.send(pdfNames);
     } catch (error) {
-      throw new Error('Error reading PDF files');
+      res.status(500).send({
+        error: 'Something went wrong while getting PDF names',
+        message: error.message,
+      });
     }
   }
 
   @Get(':name')
   async getPdfByName(@Param('name') name: string, @Res() res: Response) {
-    const uploadsFolderPath = './uploads'; // Replace with the actual path to the uploads folder
-    const pdfFilePath = path.join(uploadsFolderPath, name);
-
     try {
-      const pdfContent = await fs.promises.readFile(pdfFilePath);
+      const pdfContent = await this.pdfService.getPdfByName(name);
       res.setHeader('Content-Type', 'application/pdf');
       res.send(pdfContent);
     } catch (error) {
-      res.status(404).send('PDF not found');
+      res.status(500).send({
+        error: 'Something went wrong while updating the PDF',
+        message: error.message,
+      });
     }
   }
 
-  @Post()
-  @UseInterceptors(FileInterceptor('pdfFile'))
-  uploadPdf(@UploadedFile() pdfFile: Express.Multer.File) {
-    return this.pdfService.uploadPdf(pdfFile);
+  @Post('upload')
+  async uploadPdf(@Res() res: Response): Promise<any> {
+    const uploadsFolderPath = './uploads';
+    const pdfFilePath = path.join(uploadsFolderPath, 'example.pdf');
+
+    try {
+      const pdfContent = await fs.promises.readFile(pdfFilePath);
+      this.pdfService.uploadPdf(pdfContent);
+      res.status(200).send('PDF successfully uploaded!');
+    } catch (error) {
+      res.status(500).send({
+        error: 'Something went wrong while uploading the PDF',
+        message: error.message,
+      });
+    }
   }
 
-  @Put(':id')
-  @UseInterceptors(FileInterceptor('pdfFile'))
-  updatePdf(
-    @UploadedFile() pdfFile: Express.Multer.File,
-    @Param('id') id: string,
+  @Post('update')
+  @UseInterceptors(FileInterceptor('fileData'))
+  async uploadData(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('name') name: string,
+    @Res() res: Response,
   ) {
-    return this.pdfService.updatePdf(id, pdfFile);
+    try {
+      await this.pdfService.updatePdf(name, file.buffer);
+      res.status(200).send('PDF successfully updated!');
+    } catch (error) {
+      res.status(500).send({
+        error: 'Something went wrong while updating the PDF',
+        message: error.message,
+      });
+    }
   }
 }

@@ -1,14 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Pdf } from '../entities/pdf.entity';
 import { PdfController } from './pdf.controller';
 import { PdfService } from './pdf.service';
 
 @Module({
-  imports: [
-    MulterModule.register({
-      dest: './uploads', // Destination directory to store uploaded files
-    }),
-  ],
+  imports: [TypeOrmModule.forFeature([Pdf])],
   controllers: [PdfController],
   providers: [PdfService],
 })
