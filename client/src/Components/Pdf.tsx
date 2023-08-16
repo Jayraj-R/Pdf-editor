@@ -1,48 +1,44 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { SelectOptions } from '../utils/Types';
+import { constants } from '../utils/constants';
 import PdfSelector from './PdfSelector';
 import PdfViewer from './PdfViewer';
 
-type PdfOption = {
-	value: string;
-	label: string;
-};
-
 const Pdf = () => {
-	const [currentPdf, setCurrentPdf] = useState<PdfOption | null>(null);
-	const [pdfData, setPdfData] = useState<Blob | null>(null);
+	const [currentPdfName, setCurrentPdfName] = useState<SelectOptions | null>(
+		null
+	);
+	const [fileData, setFileData] = useState<Blob | null>(null);
 
 	useEffect(() => {
-		currentPdf
+		currentPdfName
 			? axios
-					.get(`http://localhost:8000/pdf/${currentPdf.value}`, {
+					.get(`${constants.BACKEND_URI_LOCAL}/${currentPdfName.value}`, {
 						responseType: 'arraybuffer',
 					})
 					.then((response) => {
-						const pdfData = new Blob([response.data], {
+						const fileData = new Blob([response.data], {
 							type: 'application/pdf',
 						});
-						setPdfData(pdfData);
+						setFileData(fileData);
 					})
 					.catch((error) => {
-						console.error(error);
+						console.error(`Error fetching PDF ${currentPdfName}:`, error);
 					})
-			: setPdfData(null);
-	}, [currentPdf]);
+			: setFileData(null);
+	}, [currentPdfName]);
 
 	const updatePdf = async () => {
-		if (!currentPdf || !pdfData) {
-			alert('No pdf file is selected');
-			return;
-		}
+		if (!currentPdfName || !fileData) return;
 
 		const formData = new FormData();
-		formData.append('name', currentPdf.value);
-		formData.append('fileData', pdfData);
+		formData.append('name', currentPdfName.value);
+		formData.append('fileData', fileData);
 
 		try {
 			const response = await axios.post(
-				'http://localhost:8000/pdf/update',
+				`${constants.BACKEND_URI_LOCAL}/update`,
 				formData,
 				{
 					headers: {
@@ -51,16 +47,22 @@ const Pdf = () => {
 				}
 			);
 
-			console.log('Response:', response);
+			console.log(
+				`Response from updating the ${currentPdfName.value}:`,
+				response
+			);
 		} catch (error) {
-			console.error('Error:', error);
+			console.error(`Error updating the PDF ${currentPdfName.value}:`, error);
 		}
 	};
 
 	return (
 		<div className='flex justify-center items-center w-screen h-screen bg-blue-200 gap-5 p-10'>
-			<PdfSelector currentPdf={currentPdf} setCurrentPdf={setCurrentPdf} />
-			{currentPdf && (
+			<PdfSelector
+				currentPdfName={currentPdfName}
+				setCurrentPdfName={setCurrentPdfName}
+			/>
+			{currentPdfName && (
 				<div className='flex justify-center'>
 					<button
 						onClick={updatePdf}
@@ -70,7 +72,7 @@ const Pdf = () => {
 					</button>
 				</div>
 			)}
-			{pdfData && <PdfViewer pdfData={pdfData} setPdfData={setPdfData} />}
+			{fileData && <PdfViewer fileData={fileData} setFileData={setFileData} />}
 		</div>
 	);
 };
